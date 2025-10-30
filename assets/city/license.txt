@@ -1,0 +1,8 @@
+Model Information:
+* title:	City pack 5
+* source:	https://sketchfab.com/3d-models/city-pack-5-8ce5658c42544b0dba70b8c15eb1ad05
+* author:	Pasha (https://sketchfab.com/Pasha.)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
