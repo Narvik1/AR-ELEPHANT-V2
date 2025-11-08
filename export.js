@@ -2,7 +2,7 @@ import * as THREE from './modules/three.module.js';
 import { ARButton } from './ARButton.js';
 import { createReticle, createHitTestSource, updateReticle, disposeReticle } from './reticleHelper.js';
 // ---- IMPORT BARU ----
-import { GLTFLoader } from './modules/GLTFLoader.js';
+import { GLTFLoader } from './modules/gltfloader.js';
 
 // ===== Globals =====
 let renderer, scene;
