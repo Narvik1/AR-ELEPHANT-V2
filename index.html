@@ -3,64 +3,111 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Gajah AR (Tap to Place)</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-orbit-controls@1.3.0/dist/aframe-orbit-controls.min.js"></script>
+    
+    <script>
+      AFRAME.registerComponent('ar-placer', {
+        init: function () {
+          var sceneEl = this.el.sceneEl;
+          var worldEl = document.querySelector('#world');
+          var reticleEl = document.querySelector('#reticle');
 
+          // Saat masuk mode AR
+          sceneEl.addEventListener('enter-vr', () => {
+            if (sceneEl.is('ar-mode')) {
+              // Sembunyikan objek "world"
+              worldEl.setAttribute('visible', 'false');
+              // Tampilkan reticle (penanda lantai)
+              reticleEl.setAttribute('visible', 'true');
+
+              // Dengarkan event 'ar-hit-test-select' (tap di layar)
+              reticleEl.addEventListener('ar-hit-test-select', () => {
+                // Saat di-tap, pindahkan "world" ke posisi reticle
+                var position = reticleEl.getAttribute('position');
+                worldEl.setAttribute('position', position);
+                worldEl.setAttribute('visible', 'true');
+                
+                // Sembunyikan reticle
+                reticleEl.setAttribute('visible', 'false');
+              });
+            }
+          });
+
+          // Saat keluar mode AR
+          sceneEl.addEventListener('exit-vr', () => {
+            // Sembunyikan lagi semuanya
+            reticleEl.setAttribute('visible', 'false');
+            // Saat keluar AR, kembalikan posisi "world" ke posisi 3D viewer
+            worldEl.setAttribute('position', '0 1.5 -3');
+            worldEl.setAttribute('visible', 'true');
+          });
+        }
+      });
+    </script>
   </head>
   <body>
-    <a-scene>
-      <!-- Asset Management System -->
+    
+    <a-scene 
+      webxr="optionalFeatures: hit-test, dom-overlay; overlayElement: #overlay" 
+      renderer="colorManagement: true"
+      ar-placer>
+      
       <a-assets>
-        <!-- <a-asset-item id="dragon" src="./assets/dragon/scene.gltf"></a-asset-item> -->
         <a-asset-item id="gajah" src="./assets/gajah/gajah.glb"></a-asset-item>
         <a-asset-item id="jantung" src="./assets/jantung/jantung.glb"></a-asset-item>
         <a-asset-item id="tulang" src="./assets/tulang/tulang_gajah.glb"></a-asset-item> 
-        <!-- <a-asset-item id="city" src="./assets/city/scene.gltf"></a-asset-item> -->
-        
       </a-assets>
 
-      <!-- City GLTF model -->
-      <a-entity
-        gltf-model="#city"
-        rotation="0 0 0"
-        scale="1 1 1"
-        position="-7000 -800 900">
-      </a-entity>
+      <a-ring 
+        id="reticle"
+        radius-inner="0.01"
+        radius-outer="0.02"
+        rotation="-90 0 0"
+        color="teal"
+        visible="false"
+        ar-hit-test="type: 'plane', 'shadow': false">
+      </a-ring>
 
-      <!-- Dragon GLTF + Animation -->
-      <a-entity
-        gltf-model="#gajah"
-        scale="700 700 700"
-        position="0 0 -1000"
-        rotation="0 180 0"
-        animation-mixer="clip: *; loop: repeat;">
+      <a-entity id="world" position="0 1.5 -3">
+        <a-entity
+          id="gajah-tengah"
+          gltf-model="#gajah"
+          scale="0.5 0.5 0.5"
+          position="0 0 0"
+          animation-mixer="clip: *; loop: repeat;">
+        </a-entity>
+        <a-entity
+          gltf-model="#tulang"
+          scale="0.5 0.5 0.5"
+          position="1.5 0 0"
+          animation-mixer="clip: *; loop: repeat;">
+        </a-entity>
+        <a-entity
+          gltf-model="#jantung"
+          scale="0.5 0.5 0.5"
+          position="-1.5 0 0"
+          animation-mixer="clip: *; loop: repeat;">
+        </a-entity>
       </a-entity>
-
-      <!-- Dragon GLTF + Animation -->
-      <a-entity
-        gltf-model="#tulang"
-        scale="700 700 700"
-        position="-2000 0 -1000"
-        rotation="0 180 0"
-        animation-mixer="clip: *; loop: repeat;">
-      </a-entity>
-
-      <!-- Dragon GLTF + Animation -->
-      <a-entity
-        gltf-model="#jantung"
-        scale="1400 1400 1400"
-        position="2000 -2000 0"
-        rotation="0 180 0"
-        animation-mixer="clip: *; loop: repeat;">
-      </a-entity>
-
-      <!-- Kamera dan Kontrol -->
-    <a-entity 
-      camera position="0 1.6 5" 
-      wasd-controls="speed: 10000; acceleration: 10000; deceleration: 60" 
       
-      look-controls="pointerLockEnabled: true">
-    </a-entity>
+      <a-light type="ambient" color="#888"></a-light>
+      <a-light type="directional" position="-1 1 0.5" intensity="0.6"></a-light>
+
+      <a-entity 
+        camera 
+        position="0 1.6 0" 
+        orbit-controls="
+          target: #gajah-tengah;
+          enableDamping: true;
+          dampingFactor: 0.1;
+          rotateSpeed: 0.25;
+          minDistance: 1;
+          maxDistance: 10;
+        ">
+      </a-entity>
 
     </a-scene>
   </body>
