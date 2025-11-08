@@ -1,114 +1,41 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Gajah AR (Tap to Place)</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
-    <script src="https://unpkg.com/aframe-orbit-controls@1.3.0/dist/aframe-orbit-controls.min.js"></script>
-    
-    <script>
-      AFRAME.registerComponent('ar-placer', {
-        init: function () {
-          var sceneEl = this.el.sceneEl;
-          var worldEl = document.querySelector('#world');
-          var reticleEl = document.querySelector('#reticle');
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AR Gajah (Three.js + Anchors)</title>
+  <style>
+    html,body{margin:0;height:100%;background:#111;color:#eee;font-family:system-ui,sans-serif}
+    canvas{display:block;width:100vw;height:100vh}
 
-          // Saat masuk mode AR
-          sceneEl.addEventListener('enter-vr', () => {
-            if (sceneEl.is('ar-mode')) {
-              // Sembunyikan objek "world"
-              worldEl.setAttribute('visible', 'false');
-              // Tampilkan reticle (penanda lantai)
-              reticleEl.setAttribute('visible', 'true');
+    /* DOM overlay agar header/tombol selalu terlihat saat AR */
+    #overlayRoot{
+      position:fixed; inset:0; z-index:99999;
+      pointer-events:none; /* area kosong tetap meneruskan tap ke XR */
+    }
+    #hud{
+      position:fixed; left:12px; top:12px; display:flex; gap:10px; align-items:center;
+      padding:8px 10px; border-radius:12px; background:rgba(0,0,0,.35); backdrop-filter:blur(6px);
+      pointer-events:auto; /* header/tombol bisa diklik */
+    }
+    #hud h1{margin:0;font-size:14px;font-weight:700;opacity:.95}
 
-              // Dengarkan event 'ar-hit-test-select' (tap di layar)
-              reticleEl.addEventListener('ar-hit-test-select', () => {
-                // Saat di-tap, pindahkan "world" ke posisi reticle
-                var position = reticleEl.getAttribute('position');
-                worldEl.setAttribute('position', position);
-                worldEl.setAttribute('visible', 'true');
-                
-                // Sembunyikan reticle
-                reticleEl.setAttribute('visible', 'false');
-              });
-            }
-          });
+    .xr-btn{
+      padding:8px 12px; border:none; border-radius:12px; cursor:pointer;
+      font-weight:800; letter-spacing:.2px; box-shadow:0 6px 20px rgba(0,0,0,.25);
+      background:#0077ff; color:#fff;
+    }
+    .xr-btn.exit{ background:#ff3333; }
+    .xr-btn:active{ transform:translateY(1px) }
+  </style>
+</head>
+<body>
+  <div id="overlayRoot">
+    <div id="hud">
+      <h1>AR Gajah (Demo 7 Mod)</h1>
+      </div>
+  </div>
 
-          // Saat keluar mode AR
-          sceneEl.addEventListener('exit-vr', () => {
-            // Sembunyikan lagi semuanya
-            reticleEl.setAttribute('visible', 'false');
-            // Saat keluar AR, kembalikan posisi "world" ke posisi 3D viewer
-            worldEl.setAttribute('position', '0 1.5 -3');
-            worldEl.setAttribute('visible', 'true');
-          });
-        }
-      });
-    </script>
-  </head>
-  <body>
-    
-    <a-scene 
-      webxr="optionalFeatures: hit-test, dom-overlay; overlayElement: #overlay" 
-      renderer="colorManagement: true"
-      ar-placer>
-      
-      <a-assets>
-        <a-asset-item id="gajah" src="./assets/gajah/gajah.glb"></a-asset-item>
-        <a-asset-item id="jantung" src="./assets/jantung/jantung.glb"></a-asset-item>
-        <a-asset-item id="tulang" src="./assets/tulang/tulang_gajah.glb"></a-asset-item> 
-      </a-assets>
-
-      <a-ring 
-        id="reticle"
-        radius-inner="0.01"
-        radius-outer="0.02"
-        rotation="-90 0 0"
-        color="teal"
-        visible="false"
-        ar-hit-test="type: 'plane', 'shadow': false">
-      </a-ring>
-
-      <a-entity id="world" position="0 1.5 -3">
-        <a-entity
-          id="gajah-tengah"
-          gltf-model="#gajah"
-          scale="700 700 700"
-          position="0 0 0"
-          animation-mixer="clip: *; loop: repeat;">
-        </a-entity>
-        <a-entity
-          gltf-model="#tulang"
-          scale="700 700 700"
-          position="1.5 0 0"
-          animation-mixer="clip: *; loop: repeat;">
-        </a-entity>
-        <a-entity
-          gltf-model="#jantung"
-          scale="700 700 700"
-          position="-1.5 0 0"
-          animation-mixer="clip: *; loop: repeat;">
-        </a-entity>
-      </a-entity>
-      
-      <a-light type="ambient" color="#888"></a-light>
-      <a-light type="directional" position="-1 1 0.5" intensity="0.6"></a-light>
-
-      <a-entity 
-        camera 
-        position="0 1.6 0" 
-        orbit-controls="
-          target: #gajah-tengah;
-          enableDamping: true;
-          dampingFactor: 0.1;
-          rotateSpeed: 0.25;
-          minDistance: 1;
-          maxDistance: 10;
-        ">
-      </a-entity>
-
-    </a-scene>
-  </body>
+  <script type="module" src="./export.js"></script>
+</body>
 </html>
