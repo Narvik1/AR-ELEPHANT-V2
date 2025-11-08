@@ -58,7 +58,7 @@ function init() {
       const model = gltf.scene;
       model.scale.set(0.5, 0.5, 0.5);
       model.position.set(0, 0, 0);
-      model.name = 'gajahModel'; // <-- BARU: Beri nama
+      model.name = 'gajahModel';
       gajahGroup.add(model);
   }, undefined, (e) => console.error('Gagal load gajah.glb', e));
 
@@ -66,9 +66,9 @@ function init() {
   loader.load('./assets/tulang/tulang_gajah.glb', (gltf) => {
       const model = gltf.scene;
       model.scale.set(0.5, 0.5, 0.5);
-      model.position.set(1.5, 0, 0);
-      model.name = 'tulangModel'; // <-- BARU: Beri nama
-      model.visible = false; // <-- BARU: Sembunyikan default
+      model.position.set(0, 0, 0);
+      model.name = 'tulangModel';
+      model.visible = false; 
       gajahGroup.add(model);
   }, undefined, (e) => console.error('Gagal load tulang_gajah.glb', e));
 
@@ -76,9 +76,9 @@ function init() {
   loader.load('./assets/jantung/jantung.glb', (gltf) => {
       const model = gltf.scene;
       model.scale.set(0.5, 0.5, 0.5);
-      model.position.set(-1.5, 0, 0);
-      model.name = 'jantungModel'; // <-- BARU: Beri nama
-      model.visible = false; // <-- BARU: Sembunyikan default
+      model.position.set(0, 0, 0);
+      model.name = 'jantungModel';
+      model.visible = false;
       gajahGroup.add(model);
   }, undefined, (e) => console.error('Gagal load jantung.glb', e));
 
@@ -97,33 +97,44 @@ function init() {
     }
   });
 
-  // --- LOGIKA TOMBOL BARU ---
   document.getElementById('btn-gajah').addEventListener('click', () => showModel('gajahModel'));
   document.getElementById('btn-tulang').addEventListener('click', () => showModel('tulangModel'));
   document.getElementById('btn-jantung').addEventListener('click', () => showModel('jantungModel'));
-  // --- AKHIR LOGIKA TOMBOL BARU ---
 
   renderer.xr.addEventListener('sessionstart', onSessionStart);
   renderer.xr.addEventListener('sessionend', onSessionEnd);
 }
 
-// --- FUNGSI BARU UNTUK KONTROL VISIBILITAS ---
+// --- MODIFIKASI UTAMA DI SINI ---
 /**
  * Menampilkan model berdasarkan nama dan menyembunyikan yang lain.
+ * Ini sekarang menargetkan objek yang sudah ditempatkan di AR.
  * @param {string} nameToShow Nama model yang ingin ditampilkan.
  */
 function showModel(nameToShow) {
-  if (!gajahGroup) return;
+  // Dapatkan grup objek yang sudah ditempatkan di AR (yang ada di dalam array 'placed')
+  const placedGroup = placed.length > 0 ? placed[0].mesh : null;
 
-  gajahGroup.traverse((child) => {
-    if (child.isMesh || child.isGroup) {
-      if (child.name === 'gajahModel' || child.name === 'tulangModel' || child.name === 'jantungModel') {
-        child.visible = (child.name === nameToShow);
-      }
+  let targetGroup = null;
+
+  if (placedGroup && placedGroup.visible) {
+    // Jika kita sudah menempatkan objek di AR, itulah target kita
+    targetGroup = placedGroup;
+  } else if (gajahGroup && gajahGroup.visible) {
+    // Jika kita masih di mode 3D fallback (sebelum masuk AR atau setelah keluar)
+    targetGroup = gajahGroup;
+  }
+
+  if (!targetGroup) return; // Tidak ada yang bisa diubah
+
+  // Jalankan traverse pada grup yang TEPAT (baik itu yang di AR atau yang fallback)
+  targetGroup.traverse((child) => {
+    if (child.name === 'gajahModel' || child.name === 'tulangModel' || child.name === 'jantungModel') {
+      child.visible = (child.name === nameToShow);
     }
   });
 }
-// --- AKHIR FUNGSI BARU ---
+// --- AKHIR MODIFIKASI UTAMA ---
 
 function animateFallback() {
   if (xrSession) return;
@@ -144,7 +155,6 @@ async function onSessionStart() {
 
   if (gajahGroup) gajahGroup.visible = false;
 
-  // --- BARU: Tampilkan tombol AR ---
   document.getElementById('overlayRoot').classList.add('ar-active');
 
   refSpace = await xrSession.requestReferenceSpace('local');
@@ -183,12 +193,15 @@ async function onSessionStart() {
 function onSessionEnd() {
   renderer.setAnimationLoop(null);
 
-  // --- BARU: Sembunyikan tombol AR ---
   document.getElementById('overlayRoot').classList.remove('ar-active');
+
+  // Bersihkan array 'placed' saat sesi berakhir
+  placed.length = 0; 
+  groupPlaced = false;
 
   if (gajahGroup) {
     gajahGroup.visible = true;
-    // BARU: Reset visibilitas default saat keluar AR
+    // Reset visibilitas default saat keluar AR
     showModel('gajahModel'); 
   }
 
@@ -285,7 +298,7 @@ async function onSelect() {
   mesh.rotation.set(0, 0, 0);
   mesh.scale.set(1, 1, 1);     
   
-  // --- BARU: Pastikan visibilitas anak-anaknya benar saat di-clone ---
+  // Pastikan visibilitas anak-anaknya benar saat di-clone
   mesh.traverse((child) => {
     if (child.name === 'tulangModel' || child.name === 'jantungModel') {
         child.visible = false;
