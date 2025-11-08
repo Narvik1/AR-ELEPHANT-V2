@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <!-- Install A-Frame library (bab 10 menginstruksikan meng-install A-Frame) -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
 
@@ -12,8 +11,12 @@
     <a-scene>
       <!-- Asset Management System -->
       <a-assets>
-        <a-asset-item id="dragon" src="./assets/dragon/scene.gltf"></a-asset-item>
-        <a-asset-item id="city"   src="./assets/city/scene.gltf"></a-asset-item>
+        <!-- <a-asset-item id="dragon" src="./assets/dragon/scene.gltf"></a-asset-item> -->
+        <a-asset-item id="gajah" src="./assets/gajah/gajah.glb"></a-asset-item>
+        <a-asset-item id="jantung" src="./assets/jantung/jantung.glb"></a-asset-item>
+        <a-asset-item id="tulang" src="./assets/tulang/tulang_gajah.glb"></a-asset-item> 
+        <!-- <a-asset-item id="city" src="./assets/city/scene.gltf"></a-asset-item> -->
+        
       </a-assets>
 
       <!-- City GLTF model -->
@@ -26,16 +29,34 @@
 
       <!-- Dragon GLTF + Animation -->
       <a-entity
-        gltf-model="#dragon"
+        gltf-model="#gajah"
         scale="700 700 700"
-        position="0 -90 -5000"
+        position="0 -90 -1000"
+        rotation="0 180 0"
+        animation-mixer="clip: *; loop: repeat;">
+      </a-entity>
+
+      <!-- Dragon GLTF + Animation -->
+      <a-entity
+        gltf-model="#tulang"
+        scale="700 700 700"
+        position="-2000 -90 -1000"
+        rotation="0 180 0"
+        animation-mixer="clip: *; loop: repeat;">
+      </a-entity>
+
+      <!-- Dragon GLTF + Animation -->
+      <a-entity
+        gltf-model="#jantung"
+        scale="1400 1400 1400"
+        position="2000 -1500 0"
         rotation="0 180 0"
         animation-mixer="clip: *; loop: repeat;">
       </a-entity>
 
       <!-- Kamera dan Kontrol -->
     <a-entity 
-      camera position="0 1.6 0" 
+      camera position="0 1.6 5" 
       wasd-controls="speed: 10000; acceleration: 10000; deceleration: 60" 
       
       look-controls="pointerLockEnabled: true">
