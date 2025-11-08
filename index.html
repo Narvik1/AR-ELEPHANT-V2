@@ -8,15 +8,14 @@
     html,body{margin:0;height:100%;background:#111;color:#eee;font-family:system-ui,sans-serif}
     canvas{display:block;width:100vw;height:100vh}
 
-    /* DOM overlay agar header/tombol selalu terlihat saat AR */
     #overlayRoot{
       position:fixed; inset:0; z-index:99999;
-      pointer-events:none; /* area kosong tetap meneruskan tap ke XR */
+      pointer-events:none; 
     }
     #hud{
       position:fixed; left:12px; top:12px; display:flex; gap:10px; align-items:center;
       padding:8px 10px; border-radius:12px; background:rgba(0,0,0,.35); backdrop-filter:blur(6px);
-      pointer-events:auto; /* header/tombol bisa diklik */
+      pointer-events:auto; 
     }
     #hud h1{margin:0;font-size:14px;font-weight:700;opacity:.95}
 
@@ -27,6 +26,37 @@
     }
     .xr-btn.exit{ background:#ff3333; }
     .xr-btn:active{ transform:translateY(1px) }
+
+    /* --- CSS BARU UNTUK TOMBOL KONTROL --- */
+    #ar-controls {
+      display: none; /* Sembunyikan secara default */
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      padding: 8px;
+      pointer-events: auto; /* Agar bisa diklik */
+      gap: 10px;
+    }
+
+    /* Tampilkan saat kelas .ar-active ada di #overlayRoot */
+    .ar-active #ar-controls {
+      display: flex; 
+    }
+
+    #ar-controls button {
+      padding: 10px 15px;
+      border: none;
+      background: #fff;
+      color: #333;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    /* --- AKHIR CSS BARU --- */
+
   </style>
 </head>
 <body>
@@ -34,7 +64,13 @@
     <div id="hud">
       <h1>AR Gajah (Demo 7 Mod)</h1>
       </div>
-  </div>
+
+    <div id="ar-controls">
+      <button id="btn-gajah">Gajah</button>
+      <button id="btn-tulang">Tulang</button>
+      <button id="btn-jantung">Jantung</button>
+    </div>
+    </div>
 
   <script type="module" src="./export.js"></script>
 </body>
