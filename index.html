@@ -3,75 +3,41 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AR Gajah (Three.js + Anchors)</title>
-  <style>
-    html,body{margin:0;height:100%;background:#111;color:#eee;font-family:system-ui,sans-serif}
-    canvas{display:block;width:100vw;height:100vh}
-
-    #overlayRoot{
-      position:fixed; inset:0; z-index:99999;
-      pointer-events:none; 
-    }
-    #hud{
-      position:fixed; left:12px; top:12px; display:flex; gap:10px; align-items:center;
-      padding:8px 10px; border-radius:12px; background:rgba(0,0,0,.35); backdrop-filter:blur(6px);
-      pointer-events:auto; 
-    }
-    #hud h1{margin:0;font-size:14px;font-weight:700;opacity:.95}
-
-    .xr-btn{
-      padding:8px 12px; border:none; border-radius:12px; cursor:pointer;
-      font-weight:800; letter-spacing:.2px; box-shadow:0 6px 20px rgba(0,0,0,.25);
-      background:#0077ff; color:#fff;
-    }
-    .xr-btn.exit{ background:#ff3333; }
-    .xr-btn:active{ transform:translateY(1px) }
-
-    /* --- CSS BARU UNTUK TOMBOL KONTROL --- */
-    #ar-controls {
-      display: none; /* Sembunyikan secara default */
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 12px;
-      padding: 8px;
-      pointer-events: auto; /* Agar bisa diklik */
-      gap: 10px;
-    }
-
-    /* Tampilkan saat kelas .ar-active ada di #overlayRoot */
-    .ar-active #ar-controls {
-      display: flex; 
-    }
-
-    #ar-controls button {
-      padding: 10px 15px;
-      border: none;
-      background: #fff;
-      color: #333;
-      font-weight: 700;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    /* --- AKHIR CSS BARU --- */
-
-  </style>
+  <title>AR Gajah - Menu Utama</title>
+  <link rel="stylesheet" href="style-menu.css">
 </head>
 <body>
-  <div id="overlayRoot">
-    <div id="hud">
-      <h1>AR Gajah (Demo 7 Mod)</h1>
+
+  <div class="parent">
+    
+    <div class="div1">
+      <h1>Anatomy of the Elephant: AR Experience</h1>
+    </div>
+    
+    <div class="div2" id="gajah-viewer">
       </div>
-
-    <div id="ar-controls">
-      <button id="btn-gajah">Gajah</button>
-      <button id="btn-tulang">Tulang</button>
-      <button id="btn-jantung">Jantung</button>
+    
+    <div class="div3 menu-button">
+      <button onclick="window.location='ar-gajah.html'">PLAY "Enter AR"</button>
     </div>
+    
+    <div class="div4 menu-button">
+      <button onclick="window.location='settings.html'">Settings</button>
     </div>
+    
+    <div class="div5 menu-button">
+      <button onclick="window.location='tutorial.html'">How to Play</button>
+    </div>
+    
+    <div class="div6 menu-button">
+      <button onclick="window.location='about.html'">About</button>
+    </div>
+  
+  </div>
 
-  <script type="module" src="./export.js"></script>
+  <script type="module" src="./modules/three.module.js"></script>
+  <script type="module" src="./modules/gltfloader.js"></script>
+  <script type="module" src="./menu.js"></script>
+
 </body>
 </html>
