@@ -24,6 +24,9 @@ const loader = new GLTFLoader();
 
 let scaleSlider, rotateSlider;
 
+// --- BARU: Variabel global untuk model yang sedang aktif ---
+let activeModel = null; 
+
 // --- BARU: Menyimpan posisi default model ---
 const modelOffsets = {
   gajahModel: new THREE.Vector3(0, 0, 0),
@@ -59,9 +62,12 @@ function init() {
   scene.add(dirLight);
 
   gajahGroup = new THREE.Group();
-  gajahGroup.name = "GajahWorld_Prefab"; // Beri nama prefab
+  gajahGroup.name = "GajahWorld_Prefab"; 
   gajahGroup.position.set(0, 1.5, -3); 
   scene.add(gajahGroup);
+  
+  // --- BARU: Set gajahGroup sebagai model aktif awal ---
+  activeModel = gajahGroup;
 
   // Gajah (Tengah)
   loader.load('./assets/gajah/gajah.glb', (gltf) => {
@@ -121,32 +127,7 @@ function init() {
   renderer.xr.addEventListener('sessionend', onSessionEnd);
 }
 
-// --- PERBAIKAN LOGIKA SLIDER & POSISI ---
-
-/**
- * Mendapatkan grup objek yang sedang aktif (baik di AR atau di fallback)
- * Ini adalah perbaikan utama untuk slider agar berfungsi di PC.
- */
-function getActiveGroup() {
-  // --- PERBAIKAN ---
-  // Selalu periksa grup fallback (PC) dulu JIKA kita tidak sedang dalam sesi AR
-  if (!xrSession && gajahGroup && gajahGroup.visible) {
-    return gajahGroup; // Target: Objek Fallback 3D di PC
-  }
-
-  // Jika sedang dalam sesi AR, cari objek yang ditempatkan
-  const placedGroup = placed.length > 0 ? placed[0].mesh : null;
-  if (xrSession && placedGroup && placedGroup.visible) {
-    return placedGroup; // Target: Objek AR
-  }
-  
-  // Fallback terakhir jika gajahGroup masih terlihat (walaupun seharusnya tidak saat AR)
-  if (gajahGroup && gajahGroup.visible) {
-      return gajahGroup;
-  }
-
-  return null; // Tidak ada yang bisa diubah
-}
+// --- MODIFIKASI LOGIKA KONTROL ---
 
 /**
  * Fungsi baru untuk mereset posisi/visibilitas GajahGroup (prefab)
@@ -165,57 +146,48 @@ function resetFallbackGroup() {
       child.position.copy(modelOffsets.jantungModel);
     }
   });
-  // Reset juga skala dan rotasi grup fallback
   gajahGroup.scale.set(1, 1, 1);
   gajahGroup.rotation.set(0, 0, 0);
 }
 
 /**
- * Fungsi ini sekarang menangani logika slider untuk grup APAPUN yang aktif.
+ * PERBAIKAN: Slider sekarang menargetkan 'activeModel'
  */
 function handleScale(event) {
-  const targetGroup = getActiveGroup();
-  if (!targetGroup) return;
-
+  if (!activeModel) return; // Jika tidak ada model aktif, jangan lakukan apa-apa
   const scale = parseFloat(event.target.value);
-  targetGroup.scale.set(scale, scale, scale);
+  activeModel.scale.set(scale, scale, scale);
 }
 
 /**
- * Fungsi ini sekarang menangani logika slider untuk grup APAPUN yang aktif.
+ * PERBAIKAN: Slider sekarang menargetkan 'activeModel'
  */
 function handleRotation(event) {
-  const targetGroup = getActiveGroup();
-  if (!targetGroup) return;
-
+  if (!activeModel) return; // Jika tidak ada model aktif, jangan lakukan apa-apa
   const rotationY = parseFloat(event.target.value);
-  targetGroup.rotation.y = THREE.MathUtils.degToRad(rotationY);
+  activeModel.rotation.y = THREE.MathUtils.degToRad(rotationY);
 }
 
 /**
- * PERBAIKAN: Fungsi ini sekarang memindahkan model anak ke tengah (0,0,0) saat aktif
- * dan mengembalikan mereka ke offset saat tidak aktif.
+ * PERBAIKAN: Tombol sekarang menargetkan 'activeModel' dan memindahkan posisi
  */
 function showModel(nameToShow) {
-  const targetGroup = getActiveGroup();
-  if (!targetGroup) return; 
+  if (!activeModel) return; 
 
-  targetGroup.traverse((child) => {
-    // --- PERBAIKAN BUG COPY-PASTE ADA DI SINI ---
+  activeModel.traverse((child) => {
     if (child.name === 'gajahModel') {
-      child.visible = (nameToShow === 'gajahModel'); // <-- HARUSNYA nameToShow
+      child.visible = (nameToShow === 'gajahModel');
       child.position.copy(modelOffsets.gajahModel);
     } else if (child.name === 'tulangModel') {
-      child.visible = (nameToShow === 'tulangModel'); // <-- HARUSNYA nameToShow
+      child.visible = (nameToShow === 'tulangModel');
       child.position.copy(nameToShow === 'tulangModel' ? modelOffsets.gajahModel : modelOffsets.tulangModel); 
     } else if (child.name === 'jantungModel') {
-      child.visible = (nameToShow === 'jantungModel'); // <-- HARUSNYA nameToShow
+      child.visible = (nameToShow === 'jantungModel');
       child.position.copy(nameToShow === 'jantungModel' ? modelOffsets.gajahModel : modelOffsets.jantungModel);
     }
-    // --- AKHIR PERBAIKAN ---
   });
 }
-// --- AKHIR FUNGSI PERBAIKAN ---
+// --- AKHIR PERBAIKAN ---
 
 
 function animateFallback() {
@@ -230,7 +202,8 @@ function animateFallback() {
 
 // ===== AR lifecycle =====
 async function onSessionStart() {
-  xrSession = renderer.xr.getSession(); // <-- Penting: set xrSession DI AWAL
+  xrSession = renderer.xr.getSession(); // Set global state
+  activeModel = null; // Hapus target, karena belum ada yang ditempatkan
 
   lastSpawnTs = 0;
   lastXRFrame = null;
@@ -283,7 +256,8 @@ async function onSessionStart() {
 
 function onSessionEnd() {
   renderer.setAnimationLoop(null);
-  xrSession = null; // <-- Penting: set xrSession di awal
+  xrSession = null; // Set global state
+  activeModel = gajahGroup; // Set target kembali ke prefab
 
   document.getElementById('overlayRoot').classList.remove('ar-active');
 
@@ -303,13 +277,12 @@ function onSessionEnd() {
   renderer.domElement.removeEventListener('click', domSelectFallback);
   renderer.domElement.removeEventListener('touchend', domSelectFallback);
 
-  if (controller) { // Cek controller, bukan xrSession
+  if (controller) {
     controller.removeEventListener('selectstart', onSelectLike);
     controller.removeEventListener('select', onSelectLike);
     scene.remove(controller);
     controller = null;
   }
-  // Tidak perlu cek xrSession di sini, sudah di-null-kan
 
   try { hitCancel?.(); } catch {}
   hitCancel = null;
@@ -336,9 +309,7 @@ function onSessionEnd() {
 
 // ===== XR render loop =====
 function renderXR(time, frame) {
-  const isXR = renderer.xr.isPresenting;
-
-  if (!isXR || !frame) {
+  if (!xrSession || !frame) {
     return;
   }
 
@@ -393,6 +364,7 @@ async function onSelect() {
   resetFallbackGroup(); 
   const mesh = gajahGroup.clone();
   mesh.visible = true;
+  mesh.name = "GajahWorld_Placed"; // Beri nama klon
   
   mesh.position.set(0, 0, 0); 
   mesh.rotation.set(0, 0, 0);
@@ -420,6 +392,10 @@ async function onSelect() {
     (arRoot ?? scene).add(mesh);
     groupPlaced = true;      
   }
+
+  // --- BARU: Set klon yang baru ditempatkan sebagai model aktif ---
+  activeModel = mesh;
+  // ---
 }
 
 function domSelectFallback(e) {
