@@ -29,15 +29,18 @@
 
     #ar-controls {
       display: none;
+      flex-direction: column; /* --- BARU: Ubah ke kolom --- */
       position: fixed;
       bottom: 20px;
       left: 50%;
+      width: 90%; /* --- BARU: Buat lebih lebar --- */
+      max-width: 400px; /* --- BARU: Batas lebar --- */
       transform: translateX(-50%);
       background: rgba(0, 0, 0, 0.5);
       border-radius: 12px;
-      padding: 8px;
+      padding: 12px; /* --- BARU: Sesuaikan padding --- */
       pointer-events: auto;
-      gap: 10px;
+      gap: 12px; /* --- BARU: Sesuaikan gap --- */
     }
 
     .ar-active #ar-controls {
@@ -54,11 +57,42 @@
       cursor: pointer;
     }
     
-    /* --- CSS BARU UNTUK TOMBOL KEMBALI --- */
+    /* --- BARU: Grup tombol --- */
+    #button-group {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      width: 100%;
+    }
+
+    #button-group button {
+      flex: 1; /* Agar tombol sama rata */
+    }
+    
+    /* --- CSS BARU UNTUK SLIDER --- */
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .slider-group label {
+      flex-basis: 60px; /* Beri ruang tetap untuk label */
+    }
+
+    .slider-group input[type="range"] {
+      flex-grow: 1; /* Slider mengambil sisa ruang */
+      margin: 0;
+    }
+    /* --- AKHIR CSS SLIDER --- */
+
     .ui-btn {
       position: fixed;
       top: 12px;
-      left: 12px; /* Pindahkan ke kiri */
+      left: 12px;
       z-index: 10000;
       padding: 8px 12px;
       background: rgba(0,0,0,0.35);
@@ -69,9 +103,8 @@
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
-      pointer-events: auto; /* Agar bisa diklik */
+      pointer-events: auto;
     }
-    /* --- AKHIR CSS BARU --- */
 
   </style>
 </head>
@@ -84,10 +117,21 @@
       </div>
 
     <div id="ar-controls">
-      <button id="btn-gajah">Gajah</button>
-      <button id="btn-tulang">Tulang</button>
-      <button id="btn-jantung">Jantung</button>
-    </div>
+      <div id="button-group">
+        <button id="btn-gajah">Gajah</button>
+        <button id="btn-tulang">Tulang</button>
+        <button id="btn-jantung">Jantung</button>
+      </div>
+      
+      <div class="slider-group">
+        <label for="scale-slider">Scale</label>
+        <input type="range" id="scale-slider" min="0.5" max="2.0" step="0.01" value="1.0">
+      </div>
+      <div class="slider-group">
+        <label for="rotate-slider">Rotate</label>
+        <input type="range" id="rotate-slider" min="0" max="360" step="1" value="0">
+      </div>
+      </div>
   </div>
 
   <script type="module" src="./export.js"></script>
